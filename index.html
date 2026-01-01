@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Daily Habit Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .date {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .habit-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .habit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .habit-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+            -webkit-appearance: none;
+            appearance: none;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        input[type="checkbox"]:checked {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .hydration-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .hydration-grid input[type="checkbox"] {
+            width: 100%;
+            height: 44px;
+            min-height: 44px;
+        }
+
+        .mood-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .mood-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea::placeholder {
+            color: #adb5bd;
+        }
+
+        .streak {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .streak-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 400px) {
+            .streak-info {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .streak-item {
+            text-align: center;
+        }
+
+        .streak-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .streak-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checkmark {
+            color: #28a745;
+            font-size: 20px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .toggle-btn {
+            padding: 10px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .view-container {
+            display: none;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        .summary-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mood-chart-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+        }
+
+        .chart-axis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .y-axis-labels {
+            position: absolute;
+            left: -30px;
+            top: 0;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .summary-btn {
+            padding: 8px 16px;
+            border: 2px solid #e9ecef;
+            background: white;
+            color: #495057;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .summary-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .summary-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .day-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .day-date {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .day-mood {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .day-habits {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .habit-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .habit-badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .habit-badge.incomplete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .day-notes {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #495057;
+            font-style: italic;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .stats-summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 500px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .date-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .date-nav button {
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #667eea;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .date-nav button:active {
+            background: #e9ecef;
+            transform: scale(0.95);
+        }
+
+        .date-nav button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .current-date-display {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .submit-btn:active {
+            background: #5568d3;
+            transform: scale(0.98);
+        }
+
+        .submit-btn.submitted {
+            background: #28a745;
+        }
+
+        .submit-message {
+            text-align: center;
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .submit-message.show {
+            opacity: 1;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 40px;
+            animation: float-up 2s ease-out forwards;
+            opacity: 1;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-300px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 2s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            animation: popup 0.5s ease-out forwards;
+        }
+
+        @keyframes popup {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .success-popup.hide {
+            animation: popup-out 0.3s ease-out forwards;
+        }
+
+        @keyframes popup-out {
+            to {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .success-emoji {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .success-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .success-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .export-title {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .export-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .export-btn {
+            padding: 12px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .export-btn:active {
+            background: #f8f9fa;
+            transform: scale(0.98);
+        }
+
+        .import-section {
+            margin-top: 15px;
+        }
+
+        .import-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px solid #28a745;
+            color: #28a745;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .import-btn:active {
+            background: #f8f9fa;
+            transform: scale(0.98);
+        }
+
+        #importFile {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Habits</h1>
+        <div class="date" id="currentDate"></div>
+
+        <div class="view-toggle">
+            <button class="toggle-btn active" onclick="switchView('today')">Today</button>
+            <button class="toggle-btn" onclick="switchView('summary')">Summary</button>
+        </div>
+
+        <div id="todayView" class="view-container active">
+
+        <div class="date-nav">
+            <button onclick="changeDate(-1)" id="prevBtn">◀</button>
+            <div class="current-date-display" id="currentDateDisplay"></div>
+            <button onclick="changeDate(1)" id="nextBtn">▶</button>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">💧 Hydration</span>
+            </div>
+            <div class="hydration-grid">
+                <input type="checkbox" id="hydration1">
+                <input type="checkbox" id="hydration2">
+                <input type="checkbox" id="hydration3">
+                <input type="checkbox" id="hydration4">
+                <input type="checkbox" id="hydration5">
+                <input type="checkbox" id="hydration6">
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">📖 Devotionals</span>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="devotionals">
+                </div>
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">💪 Workout</span>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="workout">
+                </div>
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">🦷 Flossing</span>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="flossing">
+                </div>
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">📚 Reading</span>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="reading">
+                </div>
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">🧘 Stretch</span>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="stretch">
+                </div>
+            </div>
+        </div>
+
+        <div class="habit-item">
+            <div class="habit-header">
+                <span class="habit-name">😊 Mood</span>
+            </div>
+            <div class="mood-input">
+                <input type="range" id="mood" min="1" max="10" value="5" oninput="updateMoodValue()">
+                <span class="mood-value" id="moodValue">5</span>
+            </div>
+            <textarea id="notes" placeholder="Optional notes about your day..."></textarea>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitDay()">Submit Today's Habits</button>
+        <div class="submit-message" id="submitMessage">✓ Submitted!</div>
+
+        <div class="streak">
+            <div class="streak-info">
+                <div class="streak-item">
+                    <div class="streak-number" id="workoutStreak">0</div>
+                    <div class="streak-label">Workout</div>
+                </div>
+                <div class="streak-item">
+                    <div class="streak-number" id="devotionalsStreak">0</div>
+                    <div class="streak-label">Devotionals</div>
+                </div>
+                <div class="streak-item">
+                    <div class="streak-number" id="readingStreak">0</div>
+                    <div class="streak-label">Reading</div>
+                </div>
+                <div class="streak-item">
+                    <div class="streak-number" id="stretchStreak">0</div>
+                    <div class="streak-label">Stretch</div>
+                </div>
+                <div class="streak-item">
+                    <div class="streak-number" id="flossingStreak">0</div>
+                    <div class="streak-label">Flossing</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <div class="export-title">Backup & Export</div>
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportJSON()">📥 Export JSON</button>
+                <button class="export-btn" onclick="exportExcel()">📊 Export Excel</button>
+            </div>
+            <div class="import-section">
+                <input type="file" id="importFile" accept=".json" onchange="importJSON(event)">
+                <button class="import-btn" onclick="document.getElementById('importFile').click()">📤 Import Backup</button>
+            </div>
+        </div>
+
+        </div>
+
+        <div id="summaryView" class="view-container">
+            <div class="summary-controls">
+                <button class="summary-btn active" onclick="loadSummary('week')">This Week</button>
+                <button class="summary-btn" onclick="loadSummary('month')">This Month</button>
+                <button class="summary-btn" onclick="loadSummary('last7')">Last 7 Days</button>
+                <button class="summary-btn" onclick="loadSummary('last30')">Last 30 Days</button>
+                <button class="summary-btn" onclick="loadSummary('all')">All Time</button>
+            </div>
+            
+            <div id="moodChart" class="mood-chart-container"></div>
+            <div id="summaryStats" class="stats-summary"></div>
+            <div id="summaryContent" class="summary-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentViewDate = new Date();
+
+        function getTodayKey() {
+            return currentViewDate.toISOString().split('T')[0];
+        }
+
+        function getActualToday() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        function updateDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', options);
+            
+            updateCurrentDateDisplay();
+        }
+
+        function updateCurrentDateDisplay() {
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            document.getElementById('currentDateDisplay').textContent = currentViewDate.toLocaleDateString('en-US', options);
+            
+            // Enable/disable next button based on if we're viewing today
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const viewDate = new Date(currentViewDate);
+            viewDate.setHours(0, 0, 0, 0);
+            
+            document.getElementById('nextBtn').disabled = viewDate >= today;
+            
+            // Update submit button text
+            const isToday = viewDate.getTime() === today.getTime();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = isToday ? "Submit Today's Habits" : "Save Entry";
+            
+            // Check if this date has been submitted
+            updateSubmitButtonState();
+        }
+
+        function changeDate(days) {
+            currentViewDate.setDate(currentViewDate.getDate() + days);
+            updateCurrentDateDisplay();
+            loadHabits();
+        }
+
+        function updateMoodValue() {
+            const moodValue = document.getElementById('mood').value;
+            document.getElementById('moodValue').textContent = moodValue;
+        }
+
+        function submitDay() {
+            const todayKey = getTodayKey();
+            const data = {
+                hydration1: document.getElementById('hydration1').checked,
+                hydration2: document.getElementById('hydration2').checked,
+                hydration3: document.getElementById('hydration3').checked,
+                hydration4: document.getElementById('hydration4').checked,
+                hydration5: document.getElementById('hydration5').checked,
+                hydration6: document.getElementById('hydration6').checked,
+                devotionals: document.getElementById('devotionals').checked,
+                workout: document.getElementById('workout').checked,
+                flossing: document.getElementById('flossing').checked,
+                reading: document.getElementById('reading').checked,
+                stretch: document.getElementById('stretch').checked,
+                mood: parseInt(document.getElementById('mood').value),
+                notes: document.getElementById('notes').value,
+                submitted: true
+            };
+            
+            localStorage.setItem(todayKey, JSON.stringify(data));
+            updateStreaks();
+            
+            // Show celebration!
+            celebrate();
+            
+            // Update button state
+            const submitBtn = document.getElementById('submitBtn');
+            const submitMessage = document.getElementById('submitMessage');
+            
+            submitBtn.classList.add('submitted');
+            submitMessage.classList.add('show');
+            
+            setTimeout(() => {
+                submitMessage.classList.remove('show');
+            }, 3000);
+            
+            updateSubmitButtonState();
+        }
+
+        function celebrate() {
+            const celebrationEmojis = ['🎉', '✨', '🌟', '⭐', '💪', '🔥', '🎊', '🏆', '👏', '🙌', '💯', '🚀', '🎯', '⚡'];
+            const messages = [
+                'Amazing work!',
+                'You\'re crushing it!',
+                'Streak maintained!',
+                'Keep it up!',
+                'You\'re a star!',
+                'Awesome job!',
+                'Nailed it!',
+                'Incredible!',
+                'You\'re unstoppable!'
+            ];
+            
+            // Create celebration container
+            const celebrationDiv = document.createElement('div');
+            celebrationDiv.className = 'celebration';
+            document.body.appendChild(celebrationDiv);
+            
+            // Create floating emojis
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'emoji';
+                    emoji.textContent = celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)];
+                    emoji.style.left = Math.random() * 100 + '%';
+                    emoji.style.top = '100%';
+                    emoji.style.animationDelay = '0s';
+                    celebrationDiv.appendChild(emoji);
+                    
+                    setTimeout(() => emoji.remove(), 2000);
+                }, i * 50);
+            }
+            
+            // Create confetti
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = '0s';
+                    confetti.style.animationDuration = (1.5 + Math.random()) + 's';
+                    celebrationDiv.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+            
+            // Show success popup
+            const popup = document.createElement('div');
+            popup.className = 'success-popup';
+            popup.innerHTML = `
+                <div class="success-emoji">${celebrationEmojis[Math.floor(Math.random() * celebrationEmojis.length)]}</div>
+                <div class="success-text">${messages[Math.floor(Math.random() * messages.length)]}</div>
+                <div class="success-subtext">Day complete!</div>
+            `;
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.classList.add('hide');
+                setTimeout(() => popup.remove(), 300);
+            }, 1500);
+            
+            // Clean up celebration container
+            setTimeout(() => {
+                celebrationDiv.remove();
+            }, 3000);
+        }
+
+        function updateSubmitButtonState() {
+            const todayKey = getTodayKey();
+            const savedData = localStorage.getItem(todayKey);
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.submitted) {
+                    submitBtn.classList.add('submitted');
+                    submitBtn.textContent = '✓ Submitted';
+                } else {
+                    submitBtn.classList.remove('submitted');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const viewDate = new Date(currentViewDate);
+                    viewDate.setHours(0, 0, 0, 0);
+                    const isToday = viewDate.getTime() === today.getTime();
+                    submitBtn.textContent = isToday ? "Submit Today's Habits" : "Save Entry";
+                }
+            } else {
+                submitBtn.classList.remove('submitted');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const viewDate = new Date(currentViewDate);
+                viewDate.setHours(0, 0, 0, 0);
+                const isToday = viewDate.getTime() === today.getTime();
+                submitBtn.textContent = isToday ? "Submit Today's Habits" : "Save Entry";
+            }
+        }
+
+        function loadHabits() {
+            const todayKey = getTodayKey();
+            const savedData = localStorage.getItem(todayKey);
+            
+            // Always reset form to blank first
+            document.getElementById('hydration1').checked = false;
+            document.getElementById('hydration2').checked = false;
+            document.getElementById('hydration3').checked = false;
+            document.getElementById('hydration4').checked = false;
+            document.getElementById('hydration5').checked = false;
+            document.getElementById('hydration6').checked = false;
+            document.getElementById('workout').checked = false;
+            document.getElementById('flossing').checked = false;
+            document.getElementById('reading').checked = false;
+            document.getElementById('stretch').checked = false;
+            document.getElementById('devotionals').checked = false;
+            document.getElementById('mood').value = 5;
+            document.getElementById('notes').value = '';
+            
+            // Only load saved data if it exists for THIS specific date
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('hydration1').checked = data.hydration1 || false;
+                document.getElementById('hydration2').checked = data.hydration2 || false;
+                document.getElementById('hydration3').checked = data.hydration3 || false;
+                document.getElementById('hydration4').checked = data.hydration4 || false;
+                document.getElementById('hydration5').checked = data.hydration5 || false;
+                document.getElementById('hydration6').checked = data.hydration6 || false;
+                document.getElementById('workout').checked = data.workout || false;
+                document.getElementById('flossing').checked = data.flossing || false;
+                document.getElementById('reading').checked = data.reading || false;
+                document.getElementById('stretch').checked = data.stretch || false;
+                document.getElementById('devotionals').checked = data.devotionals || false;
+                document.getElementById('mood').value = data.mood || 5;
+                document.getElementById('notes').value = data.notes || '';
+            }
+            
+            updateMoodValue();
+        }
+
+        function calculateStreak(habitName) {
+            let streak = 0;
+            const today = new Date();
+            
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const key = date.toISOString().split('T')[0];
+                const data = localStorage.getItem(key);
+                
+                if (data) {
+                    const habits = JSON.parse(data);
+                    // Only count if the entry was submitted
+                    if (habits.submitted && habits[habitName]) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        function updateStreaks() {
+            document.getElementById('workoutStreak').textContent = calculateStreak('workout');
+            document.getElementById('devotionalsStreak').textContent = calculateStreak('devotionals');
+            document.getElementById('readingStreak').textContent = calculateStreak('reading');
+            document.getElementById('stretchStreak').textContent = calculateStreak('stretch');
+            document.getElementById('flossingStreak').textContent = calculateStreak('flossing');
+        }
+
+        function switchView(view) {
+            // Update button states
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update views
+            document.getElementById('todayView').classList.remove('active');
+            document.getElementById('summaryView').classList.remove('active');
+
+            if (view === 'today') {
+                document.getElementById('todayView').classList.add('active');
+            } else {
+                document.getElementById('summaryView').classList.add('active');
+                loadSummary('week');
+            }
+        }
+
+        function loadSummary(period) {
+            // Update button states
+            document.querySelectorAll('.summary-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let startDate = new Date();
+            let daysToShow = 365;
+            
+            if (period === 'week') {
+                // This Week (Monday-Sunday)
+                const dayOfWeek = today.getDay();
+                const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday is 0
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - daysFromMonday);
+                daysToShow = daysFromMonday + 1;
+            } else if (period === 'month') {
+                // This Month (1st to today)
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                daysToShow = today.getDate();
+            } else if (period === 'last7') {
+                // Last 7 days (rolling)
+                daysToShow = 7;
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 6);
+            } else if (period === 'last30') {
+                // Last 30 days (rolling)
+                daysToShow = 30;
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 29);
+            } else if (period === 'all') {
+                daysToShow = 365;
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 364);
+            }
+
+            const entries = [];
+            const currentDate = new Date(startDate);
+            
+            for (let i = 0; i < daysToShow; i++) {
+                const key = currentDate.toISOString().split('T')[0];
+                const data = localStorage.getItem(key);
+                
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    entries.push({
+                        date: new Date(currentDate),
+                        key: key,
+                        ...parsed
+                    });
+                } else {
+                    // Add placeholder for missing days in calendar views
+                    if (period === 'week' || period === 'month') {
+                        entries.push({
+                            date: new Date(currentDate),
+                            key: key,
+                            missing: true
+                        });
+                    }
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            renderMoodChart(entries.filter(e => !e.missing), period);
+            renderSummary(entries, period);
+        }
+
+        function renderMoodChart(entries, period) {
+            const moodChart = document.getElementById('moodChart');
+            
+            if (entries.length === 0) {
+                moodChart.innerHTML = '';
+                return;
+            }
+
+            // Sort entries by date
+            entries.sort((a, b) => a.date - b.date);
+
+            const chartHeight = 180;
+            const topPadding = 15;
+            const usableHeight = chartHeight - topPadding;
+            const chartWidth = moodChart.offsetWidth || 400;
+            const padding = 40;
+            const usableWidth = chartWidth - (padding * 2);
+            const pointSpacing = entries.length > 1 ? usableWidth / (entries.length - 1) : usableWidth / 2;
+
+            let chartHTML = `
+                <div class="chart-title">Mood Trend</div>
+                <div style="position: relative; padding-left: 30px;">
+                    <div class="y-axis-labels">
+                        <div>10</div>
+                        <div>5</div>
+                        <div>1</div>
+                    </div>
+                    <div class="chart-canvas">
+                        <svg width="100%" height="${chartHeight}" style="position: absolute; top: 0; left: 0;">
+            `;
+
+            // Draw grid lines
+            for (let i = 0; i <= 10; i += 2) {
+                const y = topPadding + (usableHeight - ((i - 1) / 9 * usableHeight));
+                chartHTML += `<line x1="0" y1="${y}" x2="100%" y2="${y}" stroke="#e9ecef" stroke-width="1"/>`;
+            }
+
+            // Draw line connecting points
+            if (entries.length > 1) {
+                let pathD = '';
+                entries.forEach((entry, index) => {
+                    const x = padding + (index * pointSpacing);
+                    const y = topPadding + (usableHeight - ((entry.mood - 1) / 9 * usableHeight));
+                    pathD += index === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+                });
+                chartHTML += `<path d="${pathD}" fill="none" stroke="#667eea" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+            } else if (entries.length === 1) {
+                // Single point - draw a small horizontal line
+                const x = padding + usableWidth / 2;
+                const y = topPadding + (usableHeight - ((entries[0].mood - 1) / 9 * usableHeight));
+                chartHTML += `<line x1="${x - 20}" y1="${y}" x2="${x + 20}" y2="${y}" stroke="#667eea" stroke-width="3" stroke-linecap="round"/>`;
+            }
+
+            chartHTML += `</svg></div>`;
+
+            // Add x-axis labels
+            chartHTML += `<div class="chart-axis">`;
+            const labelCount = Math.min(entries.length, 7);
+            const labelStep = Math.max(1, Math.floor(entries.length / labelCount));
+            
+            entries.forEach((entry, index) => {
+                if (index % labelStep === 0 || index === entries.length - 1) {
+                    const dateStr = entry.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    chartHTML += `<span>${dateStr}</span>`;
+                }
+            });
+            
+            chartHTML += `</div></div>`;
+
+            moodChart.innerHTML = chartHTML;
+        }
+
+        function renderSummary(entries, period) {
+            const summaryContent = document.getElementById('summaryContent');
+            const summaryStats = document.getElementById('summaryStats');
+
+            // Filter out missing days for stats
+            const completedEntries = entries.filter(e => !e.missing);
+
+            if (completedEntries.length === 0) {
+                summaryContent.innerHTML = '<div class="empty-state">No data yet. Start tracking your habits!</div>';
+                summaryStats.innerHTML = '';
+                return;
+            }
+
+            // Calculate stats (only from completed entries)
+            const workoutCount = completedEntries.filter(e => e.workout).length;
+            const readingCount = completedEntries.filter(e => e.reading).length;
+            const stretchCount = completedEntries.filter(e => e.stretch).length;
+            const flossingCount = completedEntries.filter(e => e.flossing).length;
+            const avgMood = (completedEntries.reduce((sum, e) => sum + e.mood, 0) / completedEntries.length).toFixed(1);
+            const totalDays = completedEntries.length;
+
+            // Calculate average hydration
+            const totalHydration = completedEntries.reduce((sum, e) => {
+                let count = 0;
+                for (let i = 1; i <= 6; i++) {
+                    if (e[`hydration${i}`]) count++;
+                }
+                return sum + count;
+            }, 0);
+            const avgHydration = (totalHydration / completedEntries.length).toFixed(1);
+
+            // Render stats
+            summaryStats.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${avgHydration}/6</div>
+                        <div class="stat-label">Avg Water</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${workoutCount}/${totalDays}</div>
+                        <div class="stat-label">Workouts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${stretchCount}/${totalDays}</div>
+                        <div class="stat-label">Stretch</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${avgMood}</div>
+                        <div class="stat-label">Avg Mood</div>
+                    </div>
+                </div>
+            `;
+
+            // Render entries (including missing days for calendar views)
+            summaryContent.innerHTML = entries.map(entry => {
+                const dateStr = entry.date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+
+                if (entry.missing) {
+                    return `
+                        <div class="day-card" style="opacity: 0.5;">
+                            <div class="day-header">
+                                <span class="day-date">${dateStr}</span>
+                                <span class="day-mood" style="color: #999;">-</span>
+                            </div>
+                            <div style="text-align: center; color: #999; font-size: 14px; padding: 10px;">
+                                No entry
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Count hydration
+                let hydrationCount = 0;
+                for (let i = 1; i <= 6; i++) {
+                    if (entry[`hydration${i}`]) hydrationCount++;
+                }
+
+                return `
+                    <div class="day-card">
+                        <div class="day-header">
+                            <span class="day-date">${dateStr}</span>
+                            <span class="day-mood">${entry.mood}/10</span>
+                        </div>
+                        <div class="day-habits">
+                            <span class="habit-badge ${hydrationCount >= 4 ? 'completed' : 'incomplete'}">
+                                💧 ${hydrationCount}/6
+                            </span>
+                            <span class="habit-badge ${entry.devotionals ? 'completed' : 'incomplete'}">
+                                ${entry.devotionals ? '✓' : '✗'} 📖
+                            </span>
+                            <span class="habit-badge ${entry.workout ? 'completed' : 'incomplete'}">
+                                ${entry.workout ? '✓' : '✗'} 💪
+                            </span>
+                            <span class="habit-badge ${entry.flossing ? 'completed' : 'incomplete'}">
+                                ${entry.flossing ? '✓' : '✗'} 🦷
+                            </span>
+                            <span class="habit-badge ${entry.reading ? 'completed' : 'incomplete'}">
+                                ${entry.reading ? '✓' : '✗'} 📚
+                            </span>
+                            <span class="habit-badge ${entry.stretch ? 'completed' : 'incomplete'}">
+                                ${entry.stretch ? '✓' : '✗'} 🧘
+                            </span>
+                        </div>
+                        ${entry.notes ? `<div class="day-notes">${entry.notes}</div>` : ''}
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+
+        function exportJSON() {
+            const allData = {};
+            
+            // Get all habit data from localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                // Only export date-formatted keys (YYYY-MM-DD)
+                if (key && key.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    allData[key] = JSON.parse(localStorage.getItem(key));
+                }
+            }
+            
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `habit-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportExcel() {
+            const allData = [];
+            
+            // Get all habit data from localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                // Only export date-formatted keys (YYYY-MM-DD)
+                if (key && key.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    
+                    // Count hydration
+                    let hydrationCount = 0;
+                    for (let j = 1; j <= 6; j++) {
+                        if (data[`hydration${j}`]) hydrationCount++;
+                    }
+                    
+                    allData.push({
+                        Date: key,
+                        Hydration: hydrationCount,
+                        Devotionals: data.devotionals ? 'Yes' : 'No',
+                        Workout: data.workout ? 'Yes' : 'No',
+                        Flossing: data.flossing ? 'Yes' : 'No',
+                        Reading: data.reading ? 'Yes' : 'No',
+                        Stretch: data.stretch ? 'Yes' : 'No',
+                        Mood: data.mood,
+                        Notes: data.notes || '',
+                        Submitted: data.submitted ? 'Yes' : 'No'
+                    });
+                }
+            }
+            
+            // Sort by date
+            allData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            
+            // Create CSV
+            const headers = ['Date', 'Hydration', 'Devotionals', 'Workout', 'Flossing', 'Reading', 'Stretch', 'Mood', 'Notes', 'Submitted'];
+            const csvRows = [headers.join(',')];
+            
+            allData.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    // Escape quotes and wrap in quotes if contains comma or quote
+                    const escaped = String(value).replace(/"/g, '""');
+                    return escaped.includes(',') || escaped.includes('"') || escaped.includes('\n') 
+                        ? `"${escaped}"` 
+                        : escaped;
+                });
+                csvRows.push(values.join(','));
+            });
+            
+            const csvStr = csvRows.join('\n');
+            const dataBlob = new Blob([csvStr], { type: 'text/csv' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `habit-tracker-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Confirm with user
+                    if (confirm('This will merge imported data with your existing data. Continue?')) {
+                        // Import all date entries
+                        Object.keys(importedData).forEach(key => {
+                            if (key.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                localStorage.setItem(key, JSON.stringify(importedData[key]));
+                            }
+                        });
+                        
+                        alert('✓ Import successful! Refreshing...');
+                        location.reload();
+                    }
+                } catch (error) {
+                    alert('Error importing file. Please make sure it\'s a valid backup file.');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize
+        updateDate();
+        loadHabits();
+        updateStreaks();
+        updateCurrentDateDisplay();
+    </script>
+</body>
+</html>
